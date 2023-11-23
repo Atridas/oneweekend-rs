@@ -1,6 +1,6 @@
+use external::stb;
 use math::*;
 use one_weekend::Camera;
-use stb;
 
 fn main() {
     // World

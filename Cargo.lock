@@ -12,6 +12,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "external"
+version = "0.1.0"
+dependencies = [
+ "cc",
+]
+
+[[package]]
 name = "libc"
 version = "0.2.150"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -22,16 +29,16 @@ name = "math"
 version = "0.1.0"
 
 [[package]]
-name = "one-weekend"
+name = "noise"
 version = "0.1.0"
 dependencies = [
- "math",
- "stb",
+ "external",
 ]
 
 [[package]]
-name = "stb"
+name = "one-weekend"
 version = "0.1.0"
 dependencies = [
- "cc",
+ "external",
+ "math",
 ]

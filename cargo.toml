@@ -4,5 +4,6 @@ resolver = "2"
 members = [
     "math",
     "one-weekend",
-    "stb",
+    "external",
+    "noise",
 ]
