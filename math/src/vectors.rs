@@ -75,6 +75,19 @@ where
     }
 }
 
+impl<T> Vector3<T>
+where
+    T: Copy,
+    T: Add<Output = T>,
+    T: Mul<Output = T>,
+    T: Div<Output = T>,
+    T: HasSqrt,
+{
+    pub fn unit_vector(self) -> Vector3<T> {
+        self / self.length()
+    }
+}
+
 impl<T, Idx: Into<usize>> Index<Idx> for Vector3<T> {
     type Output = T;
 
@@ -146,6 +159,13 @@ impl<T: Add<Output = T> + Copy> Add<Vector3<T>> for Point3<T> {
 }
 
 impl<T: Sub<Output = T> + Copy> Sub for Vector3<T> {
+    type Output = Vector3<T>;
+    fn sub(self, rhs: Self) -> Vector3<T> {
+        Vector3::new(self.x - rhs.x, self.y - rhs.y, self.z - rhs.z)
+    }
+}
+
+impl<T: Sub<Output = T> + Copy> Sub for Point3<T> {
     type Output = Vector3<T>;
     fn sub(self, rhs: Self) -> Vector3<T> {
         Vector3::new(self.x - rhs.x, self.y - rhs.y, self.z - rhs.z)

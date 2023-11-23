@@ -1,4 +1,6 @@
-use std::ops::{Index, IndexMut, Mul};
+use std::ops::{Add, Index, IndexMut, Mul};
+
+use crate::floatops::ToFixed;
 
 #[derive(Clone, Copy)]
 pub struct RGB<T> {
@@ -7,19 +9,22 @@ pub struct RGB<T> {
     pub b: T,
 }
 
+impl<T> RGB<T> {
+    pub fn new(r: T, g: T, b: T) -> RGB<T> {
+        RGB { r, g, b }
+    }
+}
+
 impl<T> RGB<T>
 where
-    T: Copy,
-    T: Mul<Output = T>,
-    T: From<f64>,
-    T: Into<u8>,
+    T: ToFixed<u8>,
 {
     pub fn to_byte_array(input: &[RGB<T>]) -> Vec<u8> {
         let mut result = Vec::with_capacity(input.len());
         for i in input {
-            result.push((i.r * T::from(255.999)).into());
-            result.push((i.g * T::from(255.999)).into());
-            result.push((i.b * T::from(255.999)).into());
+            result.push(i.r.to_fixed());
+            result.push(i.g.to_fixed());
+            result.push(i.b.to_fixed());
         }
         result
     }
@@ -46,5 +51,19 @@ impl<T, Idx: Into<usize>> IndexMut<Idx> for RGB<T> {
             2 => &mut self.b,
             _ => panic!("index out of bounds"),
         }
+    }
+}
+
+impl<T: Mul<Output = T> + Copy> Mul<T> for RGB<T> {
+    type Output = RGB<T>;
+    fn mul(self, rhs: T) -> RGB<T> {
+        RGB::new(self.r * rhs, self.g * rhs, self.b * rhs)
+    }
+}
+
+impl<T: Add<Output = T> + Copy> Add for RGB<T> {
+    type Output = RGB<T>;
+    fn add(self, rhs: RGB<T>) -> RGB<T> {
+        RGB::new(self.r + rhs.r, self.g + rhs.g, self.b + rhs.b)
     }
 }

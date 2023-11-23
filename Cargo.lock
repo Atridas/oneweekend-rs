@@ -25,6 +25,7 @@ version = "0.1.0"
 name = "one-weekend"
 version = "0.1.0"
 dependencies = [
+ "math",
  "stb",
 ]
 
