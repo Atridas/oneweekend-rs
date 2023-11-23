@@ -36,6 +36,9 @@ where
     pub fn dot(&self, rhs: Vector3<T>) -> T {
         self.x * rhs.x + self.y * rhs.y + self.z * rhs.z
     }
+    pub fn length_squared(&self) -> T {
+        self.dot(*self)
+    }
 }
 
 impl<T> Vector3<T>
@@ -238,5 +241,15 @@ impl<T: DivAssign + Copy> DivAssign<T> for Vector3<T> {
         self.x /= rhs;
         self.y /= rhs;
         self.z /= rhs;
+    }
+}
+
+impl<T> From<Point3<T>> for Vector3<T> {
+    fn from(value: Point3<T>) -> Self {
+        Vector3 {
+            x: value.x,
+            y: value.y,
+            z: value.z,
+        }
     }
 }

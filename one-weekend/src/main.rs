@@ -15,6 +15,27 @@ fn main() {
         image_height
     };
 
+    // World
+    let mut world: Vec<Box<dyn Hittable<f64>>> = Vec::new();
+    world.push(Box::new(Sphere::new(
+        Point3 {
+            x: 0.0,
+            y: 0.0,
+            z: -1.0,
+        },
+        0.5,
+    )));
+    world.push(Box::new(Sphere::new(
+        Point3 {
+            x: 0.0,
+            y: -100.5,
+            z: -1.0,
+        },
+        100.0,
+    )));
+
+    let world = &world[..];
+
     // Camera
 
     let focal_length = 1.0;
@@ -47,7 +68,7 @@ fn main() {
             let ray_direction = pixel_center - camera_center;
             let r = Ray::new(camera_center, ray_direction);
 
-            let rgb: RGB<f32> = ray_color(&r);
+            let rgb: RGB<f32> = ray_color(&r, &world);
 
             data.push(rgb);
         }

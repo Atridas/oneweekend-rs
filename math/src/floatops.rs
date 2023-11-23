@@ -20,6 +20,9 @@ pub trait Constants {
     fn zero() -> Self;
     fn one() -> Self;
     fn two() -> Self;
+    fn infinity() -> Self;
+    fn pi() -> Self;
+    fn pi_over_180() -> Self;
 }
 
 impl Constants for f32 {
@@ -32,6 +35,15 @@ impl Constants for f32 {
     fn two() -> Self {
         2.0
     }
+    fn infinity() -> Self {
+        Self::INFINITY
+    }
+    fn pi() -> Self {
+        3.1415926535897932385
+    }
+    fn pi_over_180() -> Self {
+        3.1415926535897932385 / 180.0
+    }
 }
 
 impl Constants for f64 {
@@ -43,6 +55,15 @@ impl Constants for f64 {
     }
     fn two() -> Self {
         2.0
+    }
+    fn infinity() -> Self {
+        Self::INFINITY
+    }
+    fn pi() -> Self {
+        3.1415926535897932385
+    }
+    fn pi_over_180() -> Self {
+        3.1415926535897932385 / 180.0
     }
 }
 
