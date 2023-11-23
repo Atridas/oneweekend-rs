@@ -16,8 +16,8 @@ fn main() {
     };
 
     // World
-    let mut world: Vec<Box<dyn Hittable<f64>>> = Vec::new();
-    world.push(Box::new(Sphere::new(
+    let mut world: Vec<GeometricPrimitive<f64>> = Vec::new();
+    world.push(GeometricPrimitive::Sphere(Sphere::new(
         Point3 {
             x: 0.0,
             y: 0.0,
@@ -25,7 +25,7 @@ fn main() {
         },
         0.5,
     )));
-    world.push(Box::new(Sphere::new(
+    world.push(GeometricPrimitive::Sphere(Sphere::new(
         Point3 {
             x: 0.0,
             y: -100.5,

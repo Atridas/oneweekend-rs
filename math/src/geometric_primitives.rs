@@ -65,3 +65,37 @@ where
         ))
     }
 }
+
+pub enum GeometricPrimitive<T> {
+    Sphere(Sphere<T>),
+}
+
+impl<T> Hittable<T> for GeometricPrimitive<T>
+where
+    Sphere<T>: Hittable<T>,
+{
+    fn hit(&self, ray: &Ray<T>, ray_t: Interval<T>) -> Option<HitRecord<T>> {
+        match self {
+            GeometricPrimitive::Sphere(s) => s.hit(ray, ray_t),
+        }
+    }
+}
+
+impl<T> Hittable<T> for &[GeometricPrimitive<T>]
+where
+    T: Copy,
+    Sphere<T>: Hittable<T>,
+{
+    fn hit(&self, ray: &Ray<T>, ray_t: Interval<T>) -> Option<HitRecord<T>> {
+        let mut result = None;
+        let mut closest = ray_t.max;
+        for object in self.iter() {
+            let ray_t = Interval::new(ray_t.min, closest);
+            if let Some(hit) = object.hit(ray, ray_t) {
+                closest = hit.t;
+                result = Some(hit);
+            }
+        }
+        result
+    }
+}
