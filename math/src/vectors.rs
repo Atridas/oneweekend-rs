@@ -88,6 +88,7 @@ where
     }
 }
 
+// overrides vec[idx]
 impl<T, Idx: Into<usize>> Index<Idx> for Vector3<T> {
     type Output = T;
 
@@ -101,6 +102,7 @@ impl<T, Idx: Into<usize>> Index<Idx> for Vector3<T> {
     }
 }
 
+// overrides vec[idx]
 impl<T, Idx: Into<usize>> IndexMut<Idx> for Vector3<T> {
     fn index_mut(&mut self, index: Idx) -> &mut Self::Output {
         match index.into() {
@@ -112,6 +114,7 @@ impl<T, Idx: Into<usize>> IndexMut<Idx> for Vector3<T> {
     }
 }
 
+// overrides point[idx]
 impl<T, Idx: Into<usize>> Index<Idx> for Point3<T> {
     type Output = T;
 
@@ -125,6 +128,7 @@ impl<T, Idx: Into<usize>> Index<Idx> for Point3<T> {
     }
 }
 
+// overrides point[idx]
 impl<T, Idx: Into<usize>> IndexMut<Idx> for Point3<T> {
     fn index_mut(&mut self, index: Idx) -> &mut Self::Output {
         match index.into() {
@@ -136,6 +140,7 @@ impl<T, Idx: Into<usize>> IndexMut<Idx> for Point3<T> {
     }
 }
 
+// overrides -vec
 impl<T: Neg<Output = T>> Neg for Vector3<T> {
     type Output = Vector3<T>;
 
@@ -144,6 +149,7 @@ impl<T: Neg<Output = T>> Neg for Vector3<T> {
     }
 }
 
+// overrides vec1 + vec2
 impl<T: Add<Output = T> + Copy> Add for Vector3<T> {
     type Output = Vector3<T>;
     fn add(self, rhs: Self) -> Vector3<T> {
@@ -151,6 +157,7 @@ impl<T: Add<Output = T> + Copy> Add for Vector3<T> {
     }
 }
 
+// overrides point + vec
 impl<T: Add<Output = T> + Copy> Add<Vector3<T>> for Point3<T> {
     type Output = Point3<T>;
     fn add(self, rhs: Vector3<T>) -> Point3<T> {
@@ -158,6 +165,7 @@ impl<T: Add<Output = T> + Copy> Add<Vector3<T>> for Point3<T> {
     }
 }
 
+// overrides vec1 - vec2
 impl<T: Sub<Output = T> + Copy> Sub for Vector3<T> {
     type Output = Vector3<T>;
     fn sub(self, rhs: Self) -> Vector3<T> {
@@ -165,6 +173,7 @@ impl<T: Sub<Output = T> + Copy> Sub for Vector3<T> {
     }
 }
 
+// overrides point1 - point2
 impl<T: Sub<Output = T> + Copy> Sub for Point3<T> {
     type Output = Vector3<T>;
     fn sub(self, rhs: Self) -> Vector3<T> {
@@ -172,6 +181,7 @@ impl<T: Sub<Output = T> + Copy> Sub for Point3<T> {
     }
 }
 
+// overrides point - vec
 impl<T: Sub<Output = T> + Copy> Sub<Vector3<T>> for Point3<T> {
     type Output = Point3<T>;
     fn sub(self, rhs: Vector3<T>) -> Point3<T> {
@@ -179,6 +189,7 @@ impl<T: Sub<Output = T> + Copy> Sub<Vector3<T>> for Point3<T> {
     }
 }
 
+// overrides vec * s
 impl<T: Mul<Output = T> + Copy> Mul<T> for Vector3<T> {
     type Output = Vector3<T>;
     fn mul(self, rhs: T) -> Vector3<T> {
@@ -186,6 +197,7 @@ impl<T: Mul<Output = T> + Copy> Mul<T> for Vector3<T> {
     }
 }
 
+// overrides vec / s
 impl<T: Div<Output = T> + Copy> Div<T> for Vector3<T> {
     type Output = Vector3<T>;
     fn div(self, rhs: T) -> Vector3<T> {
@@ -193,6 +205,7 @@ impl<T: Div<Output = T> + Copy> Div<T> for Vector3<T> {
     }
 }
 
+// overrides vec1 += vec2
 impl<T: AddAssign> AddAssign for Vector3<T> {
     fn add_assign(&mut self, rhs: Self) {
         self.x += rhs.x;
@@ -201,6 +214,7 @@ impl<T: AddAssign> AddAssign for Vector3<T> {
     }
 }
 
+// overrides vec += point
 impl<T: AddAssign> AddAssign<Vector3<T>> for Point3<T> {
     fn add_assign(&mut self, rhs: Vector3<T>) {
         self.x += rhs.x;
@@ -209,6 +223,7 @@ impl<T: AddAssign> AddAssign<Vector3<T>> for Point3<T> {
     }
 }
 
+// overrides vec *= s
 impl<T: MulAssign + Copy> MulAssign<T> for Vector3<T> {
     fn mul_assign(&mut self, rhs: T) {
         self.x *= rhs;
@@ -217,6 +232,7 @@ impl<T: MulAssign + Copy> MulAssign<T> for Vector3<T> {
     }
 }
 
+// overrides vec /= s
 impl<T: DivAssign + Copy> DivAssign<T> for Vector3<T> {
     fn div_assign(&mut self, rhs: T) {
         self.x /= rhs;

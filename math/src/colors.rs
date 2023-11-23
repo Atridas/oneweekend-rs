@@ -30,6 +30,7 @@ where
     }
 }
 
+// overrides rgb[idx]
 impl<T, Idx: Into<usize>> Index<Idx> for RGB<T> {
     type Output = T;
 
@@ -43,6 +44,7 @@ impl<T, Idx: Into<usize>> Index<Idx> for RGB<T> {
     }
 }
 
+// overrides rgb[idx]
 impl<T, Idx: Into<usize>> IndexMut<Idx> for RGB<T> {
     fn index_mut(&mut self, index: Idx) -> &mut Self::Output {
         match index.into() {
@@ -54,6 +56,7 @@ impl<T, Idx: Into<usize>> IndexMut<Idx> for RGB<T> {
     }
 }
 
+// overrides rgb * s
 impl<T: Mul<Output = T> + Copy> Mul<T> for RGB<T> {
     type Output = RGB<T>;
     fn mul(self, rhs: T) -> RGB<T> {
@@ -61,6 +64,7 @@ impl<T: Mul<Output = T> + Copy> Mul<T> for RGB<T> {
     }
 }
 
+// overrides rgb1 + rgb2
 impl<T: Add<Output = T> + Copy> Add for RGB<T> {
     type Output = RGB<T>;
     fn add(self, rhs: RGB<T>) -> RGB<T> {
