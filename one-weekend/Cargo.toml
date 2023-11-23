@@ -7,4 +7,5 @@ edition = "2021"
 
 [dependencies]
 math = {path = "../math" }
+noise = { path = "../noise" }
 external = { path = "../external" }

@@ -13,6 +13,8 @@
 //	100% of the time (or are excessively overkill/slow for our needs, such as MD5 or SHA).
 /////////////////////////////////////////////////////////////////////////////////////////////////
 
+use std::num::Wrapping;
+
 /// Fast hash of an int32 into a different (unrecognizable) uint32.
 ///
 /// Returns an unsigned integer containing 32 reasonably-well-scrambled bits, based on the hash
@@ -37,7 +39,7 @@ pub fn squirrel_noise5(x: i32, seed: u32) -> i32 {
     const SQ5_BIT_NOISE4: u32 = 0xB79F3ABB; // 10110111100111110011101010111011
     const SQ5_BIT_NOISE5: u32 = 0x1b56c4f5; // 00011011010101101100010011110101
 
-    let mut mangled_bits = x as u32;
+    let mut mangled_bits = Wrapping(x as u32);
     mangled_bits *= SQ5_BIT_NOISE1;
     mangled_bits += seed;
     mangled_bits ^= mangled_bits >> 9;
@@ -49,7 +51,7 @@ pub fn squirrel_noise5(x: i32, seed: u32) -> i32 {
     mangled_bits ^= mangled_bits >> 15;
     mangled_bits *= SQ5_BIT_NOISE5;
     mangled_bits ^= mangled_bits >> 17;
-    mangled_bits as i32
+    mangled_bits.0 as i32
 }
 
 //-----------------------------------------------------------------------------------------------

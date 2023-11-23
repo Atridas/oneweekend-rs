@@ -1,4 +1,5 @@
 use math::*;
+use noise::RandomNumberGenerator;
 
 pub struct Camera {
     center: Point3<f64>,
@@ -7,10 +8,11 @@ pub struct Camera {
     pixel_delta_v: Vector3<f64>,
     image_width: u32,
     image_height: u32,
+    samples_per_pixel: u32,
 }
 
 impl Camera {
-    pub fn new(aspect_ratio: f64, image_width: u32) -> Camera {
+    pub fn new(aspect_ratio: f64, image_width: u32, samples_per_pixel: u32) -> Camera {
         // Calculate the image height, and ensure that it's at least 1.
         let image_height = (image_width as f64 / aspect_ratio) as usize;
         let image_height = if image_height < 1usize {
@@ -47,6 +49,7 @@ impl Camera {
             pixel_delta_v,
             image_width,
             image_height: image_height as u32,
+            samples_per_pixel,
         }
     }
 
@@ -57,21 +60,23 @@ impl Camera {
         self.image_height
     }
 
-    pub fn render<T: Hittable<f64>>(&self, world: &T) -> Vec<RGB<f32>> {
+    pub fn render<T: Hittable<f64>>(
+        &self,
+        world: &T,
+        rng: &mut RandomNumberGenerator,
+    ) -> Vec<RGB<f32>> {
         let mut data = Vec::with_capacity((self.image_width * self.image_height * 3) as usize);
 
         for j in 0..self.image_height {
             eprint!("\rScanlines remaining {} ", self.image_height - j);
             for i in 0..self.image_width {
-                let pixel_center = self.pixel00_loc
-                    + (self.pixel_delta_u * i as f64)
-                    + (self.pixel_delta_v * j as f64);
-                let ray_direction = pixel_center - self.center;
-                let r = Ray::new(self.center, ray_direction);
+                let mut rgb = RGB::new(0.0, 0.0, 0.0);
+                for _ in 0..self.samples_per_pixel {
+                    let r = self.get_ray(i, j, rng);
 
-                let rgb: RGB<f32> = Camera::ray_color(&r, world);
-
-                data.push(rgb);
+                    rgb += Camera::ray_color(&r, world);
+                }
+                data.push(rgb / self.samples_per_pixel as f32);
             }
         }
         data
@@ -93,5 +98,25 @@ impl Camera {
                 RGB::new(1.0, 1.0, 1.0) * (1.0 - a) + RGB::new(0.5, 0.7, 1.0) * a
             }
         }
+    }
+
+    fn pixel_sample_square(&self, rng: &mut RandomNumberGenerator) -> Vector3<f64> {
+        // Returns a random point in the square surrounding a pixel at the origin.
+        let px = -0.5 + rng.next_double();
+        let py = -0.5 + rng.next_double();
+        return (self.pixel_delta_u * px) + (self.pixel_delta_v * py);
+    }
+
+    fn get_ray(&self, i: u32, j: u32, rng: &mut RandomNumberGenerator) -> Ray<f64> {
+        // Get a randomly sampled camera ray for the pixel at location i,j.
+
+        let pixel_center =
+            self.pixel00_loc + (self.pixel_delta_u * i as f64) + (self.pixel_delta_v * j as f64);
+        let pixel_sample = pixel_center + self.pixel_sample_square(rng);
+
+        let ray_origin = self.center;
+        let ray_direction = pixel_sample - ray_origin;
+
+        Ray::new(ray_origin, ray_direction)
     }
 }

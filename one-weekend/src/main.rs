@@ -1,5 +1,6 @@
 use external::stb;
 use math::*;
+use noise::RandomNumberGenerator;
 use one_weekend::Camera;
 
 fn main() {
@@ -26,11 +27,15 @@ fn main() {
 
     // Camera
 
-    let camera = Camera::new(16.0 / 9.0, 400);
+    let camera = Camera::new(16.0 / 9.0, 400, 10);
+
+    // RNG
+
+    let mut rng = RandomNumberGenerator::new(42);
 
     // Render
 
-    let data = camera.render(&world);
+    let data = camera.render(&world, &mut rng);
 
     eprint!("\rWriting image            ");
 

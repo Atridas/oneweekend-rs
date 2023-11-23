@@ -1,13 +1,13 @@
 use external::squirrel_noise::*;
 
-pub struct RandomGenerator {
+pub struct RandomNumberGenerator {
     pos: i32,
     seed: u32,
 }
 
-impl RandomGenerator {
-    pub fn new(seed: u32) -> RandomGenerator {
-        RandomGenerator { pos: 0, seed }
+impl RandomNumberGenerator {
+    pub fn new(seed: u32) -> RandomNumberGenerator {
+        RandomNumberGenerator { pos: 0, seed }
     }
 
     pub fn next_int(&mut self) -> i32 {

@@ -1,4 +1,4 @@
-use std::ops::{Add, Index, IndexMut, Mul};
+use std::ops::{Add, AddAssign, Div, Index, IndexMut, Mul};
 
 use crate::floatops::ToFixed;
 
@@ -64,10 +64,27 @@ impl<T: Mul<Output = T> + Copy> Mul<T> for RGB<T> {
     }
 }
 
+// overrides rgb / s
+impl<T: Div<Output = T> + Copy> Div<T> for RGB<T> {
+    type Output = RGB<T>;
+    fn div(self, rhs: T) -> RGB<T> {
+        RGB::new(self.r / rhs, self.g / rhs, self.b / rhs)
+    }
+}
+
 // overrides rgb1 + rgb2
 impl<T: Add<Output = T> + Copy> Add for RGB<T> {
     type Output = RGB<T>;
     fn add(self, rhs: RGB<T>) -> RGB<T> {
         RGB::new(self.r + rhs.r, self.g + rhs.g, self.b + rhs.b)
+    }
+}
+
+// overrides rgb1 += rgb2
+impl<T: AddAssign + Copy> AddAssign for RGB<T> {
+    fn add_assign(&mut self, rhs: Self) {
+        self.r += rhs.r;
+        self.g += rhs.g;
+        self.b += rhs.b;
     }
 }

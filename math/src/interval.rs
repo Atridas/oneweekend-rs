@@ -33,13 +33,22 @@ where
 
 impl<T> Interval<T>
 where
-    T: Clone + PartialOrd,
+    T: Copy + PartialOrd,
 {
     pub fn contains(&self, x: T) -> bool {
         self.min <= x && x <= self.max
     }
     pub fn surrounds(&self, x: T) -> bool {
         self.min < x && x < self.max
+    }
+    pub fn clamp(&self, x: T) -> T {
+        if x < self.min {
+            self.min
+        } else if x > self.max {
+            self.max
+        } else {
+            x
+        }
     }
 }
 
