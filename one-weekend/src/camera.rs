@@ -9,10 +9,16 @@ pub struct Camera {
     image_width: u32,
     image_height: u32,
     samples_per_pixel: u32,
+    max_depth: u32,
 }
 
 impl Camera {
-    pub fn new(aspect_ratio: f64, image_width: u32, samples_per_pixel: u32) -> Camera {
+    pub fn new(
+        aspect_ratio: f64,
+        image_width: u32,
+        samples_per_pixel: u32,
+        max_depth: u32,
+    ) -> Camera {
         // Calculate the image height, and ensure that it's at least 1.
         let image_height = (image_width as f64 / aspect_ratio) as usize;
         let image_height = if image_height < 1usize {
@@ -50,6 +56,7 @@ impl Camera {
             image_width,
             image_height: image_height as u32,
             samples_per_pixel,
+            max_depth,
         }
     }
 
@@ -74,7 +81,7 @@ impl Camera {
                 for _ in 0..self.samples_per_pixel {
                     let r = self.get_ray(i, j, rng);
 
-                    rgb += Camera::ray_color(&r, world);
+                    rgb += Camera::ray_color(&r, self.max_depth, world, rng);
                 }
                 data.push(rgb / self.samples_per_pixel as f32);
             }
@@ -82,15 +89,21 @@ impl Camera {
         data
     }
 
-    fn ray_color<T: Hittable<f64>>(ray: &Ray<f64>, world: &T) -> RGB<f32> {
-        match world.hit(ray, Interval::new(0.0, f64::INFINITY)) {
+    fn ray_color<T: Hittable<f64>>(
+        ray: &Ray<f64>,
+        depth: u32,
+        world: &T,
+        rng: &mut RandomNumberGenerator,
+    ) -> RGB<f32> {
+        if depth <= 0 {
+            return RGB::black();
+        }
+        match world.hit(ray, Interval::new(0.001, f64::INFINITY)) {
             Some(record) => {
-                let normal_colour = RGB::new(
-                    record.normal.x as f32,
-                    record.normal.y as f32,
-                    record.normal.z as f32,
-                );
-                (normal_colour + RGB::new(1.0, 1.0, 1.0)) * 0.5
+                let direction = (record.normal + Vector3::random_on_hemisphere(rng, record.normal))
+                    .unit_vector();
+
+                Self::ray_color(&Ray::new(record.point, direction), depth - 1, world, rng) * 0.5
             }
             None => {
                 let unit_direction = Vector3::unit_vector(ray.direction());

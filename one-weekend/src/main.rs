@@ -27,7 +27,7 @@ fn main() {
 
     // Camera
 
-    let camera = Camera::new(16.0 / 9.0, 400, 10);
+    let camera = Camera::new(16.0 / 9.0, 400, 10, 50);
 
     // RNG
 
@@ -44,7 +44,7 @@ fn main() {
         camera.get_image_width(),
         camera.get_image_height(),
         3,
-        &RGB::to_byte_array(&data),
+        &RGB::to_srgb_array(&data),
     )
     .unwrap();
     eprint!("\rDONE            \n");

@@ -1,6 +1,6 @@
 use std::ops::{Add, AddAssign, Div, Index, IndexMut, Mul};
 
-use crate::floatops::ToFixed;
+use crate::floatops::Constants;
 
 #[derive(Clone, Copy)]
 pub struct RGB<T> {
@@ -17,14 +17,20 @@ impl<T> RGB<T> {
 
 impl<T> RGB<T>
 where
-    T: ToFixed<u8>,
+    T: Constants,
 {
-    pub fn to_byte_array(input: &[RGB<T>]) -> Vec<u8> {
+    pub fn black() -> Self {
+        Self::new(Constants::zero(), Constants::zero(), Constants::zero())
+    }
+}
+
+impl RGB<f32> {
+    pub fn to_srgb_array(input: &[RGB<f32>]) -> Vec<u8> {
         let mut result = Vec::with_capacity(input.len());
         for i in input {
-            result.push(i.r.to_fixed());
-            result.push(i.g.to_fixed());
-            result.push(i.b.to_fixed());
+            result.push((i.r.powf(1.0 / 2.2) * 255.0) as u8);
+            result.push((i.g.powf(1.0 / 2.2) * 255.0) as u8);
+            result.push((i.b.powf(1.0 / 2.2) * 255.0) as u8);
         }
         result
     }

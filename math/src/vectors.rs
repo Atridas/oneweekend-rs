@@ -1,3 +1,5 @@
+use crate::{floatops::Constants, RandomSource};
+
 use super::floatops::HasSqrt;
 use std::ops::{Add, AddAssign, Div, DivAssign, Index, IndexMut, Mul, MulAssign, Neg, Sub};
 
@@ -19,6 +21,26 @@ impl<T> Vector3<T> {
     pub fn new(x: T, y: T, z: T) -> Self {
         Self { x, y, z }
     }
+
+    pub fn random<RNG: RandomSource<T>>(rng: &mut RNG) -> Self {
+        Self {
+            x: rng.next(),
+            y: rng.next(),
+            z: rng.next(),
+        }
+    }
+}
+impl<T> Vector3<T>
+where
+    T: Copy,
+{
+    pub fn random_range<RNG: RandomSource<T>>(rng: &mut RNG, min: T, max: T) -> Self {
+        Self {
+            x: rng.next_range(min, max),
+            y: rng.next_range(min, max),
+            z: rng.next_range(min, max),
+        }
+    }
 }
 
 impl<T> Point3<T> {
@@ -38,6 +60,39 @@ where
     }
     pub fn length_squared(&self) -> T {
         self.dot(*self)
+    }
+}
+impl<T> Vector3<T>
+where
+    T: Copy,
+    T: Add<Output = T>,
+    T: Div<Output = T>,
+    T: Mul<Output = T>,
+    T: Neg<Output = T>,
+    T: PartialOrd,
+    T: Constants,
+    T: HasSqrt,
+{
+    pub fn random_in_unit_sphere<RNG: RandomSource<T>>(rng: &mut RNG) -> Self {
+        loop {
+            let p = Vector3::random(rng);
+            if p.length_squared() < T::one() {
+                return p;
+            }
+        }
+    }
+
+    pub fn random_unit_vector<RNG: RandomSource<T>>(rng: &mut RNG) -> Self {
+        Vector3::random_in_unit_sphere(rng).unit_vector()
+    }
+
+    pub fn random_on_hemisphere<RNG: RandomSource<T>>(rng: &mut RNG, normal: Self) -> Self {
+        let on_unit_sphere = Vector3::random_unit_vector(rng);
+        if on_unit_sphere.dot(normal) > Constants::zero() {
+            on_unit_sphere
+        } else {
+            -on_unit_sphere
+        }
     }
 }
 

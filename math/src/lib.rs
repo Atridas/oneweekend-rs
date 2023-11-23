@@ -12,3 +12,9 @@ pub use hittable::*;
 pub use interval::*;
 pub use rays::*;
 pub use vectors::*;
+
+pub trait RandomSource<T> {
+    /// Generates a number between [0 and 1)
+    fn next(&mut self) -> T;
+    fn next_range(&mut self, min: T, max: T) -> T;
+}
