@@ -91,6 +91,10 @@ impl<T: Float> Vector3<T> {
         Vector3::new(self.x * rhs.x, self.y * rhs.y, self.z * rhs.z)
     }
 
+    pub fn reflect(&self, normal: Vector3<T>) -> Vector3<T> {
+        *self - normal * (self.dot(normal) * T::constant(2.0))
+    }
+
     pub fn near_zero(&self) -> bool {
         let s = T::constant(1e-8);
         self.x.abs() < s && self.y.abs() < s && self.z.abs() < s

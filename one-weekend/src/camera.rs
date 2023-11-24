@@ -77,7 +77,11 @@ impl Camera {
         let mut data = Vec::with_capacity((self.image_width * self.image_height * 3) as usize);
 
         for j in 0..self.image_height {
-            eprint!("\rScanlines remaining {} ", self.image_height - j);
+            eprint!(
+                "\rScanlines remaining {}/{} ",
+                self.image_height - j,
+                self.image_height
+            );
             for i in 0..self.image_width {
                 let mut rgb = RGB::new(0.0, 0.0, 0.0);
                 for _ in 0..self.samples_per_pixel {
@@ -101,19 +105,12 @@ impl Camera {
             return RGB::black();
         }
         match world.hit(ray, Interval::new(0.001, f64::INFINITY)) {
-            Some(hit_record) => {
-                // let direction = (record.normal
-                //     + Vector3::random_on_hemisphere(&mut RNGAdapter(rng), record.normal))
-                // .unit_vector();
-
-                // Self::ray_color(&Ray::new(record.point, direction), depth - 1, world, rng) * 0.5
-                match hit_record.material.scatter(rng, ray, &hit_record) {
-                    Some((scattered_ray, attenuation)) => {
-                        attenuation * Self::ray_color(&scattered_ray, depth - 1, world, rng)
-                    }
-                    None => RGB::black(),
+            Some(hit_record) => match hit_record.material.scatter(rng, ray, &hit_record) {
+                Some((scattered_ray, attenuation)) => {
+                    attenuation * Self::ray_color(&scattered_ray, depth - 1, world, rng)
                 }
-            }
+                None => RGB::black(),
+            },
             None => {
                 let unit_direction = Vector3::unit_vector(ray.direction());
                 let a = ((unit_direction.y + 1.0) * 0.5) as f32;
