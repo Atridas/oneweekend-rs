@@ -1,9 +1,9 @@
-use crate::floatops::Float;
-use crate::Interval;
+use math::Float;
+use math::Interval;
 
-use super::Point3;
-use super::Ray;
-use super::Vector3;
+use math::Point3;
+use math::Ray;
+use math::Vector3;
 
 pub struct HitRecord<T> {
     pub point: Point3<T>,

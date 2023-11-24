@@ -1,7 +1,7 @@
 use external::stb;
 use math::*;
 use noise::RandomNumberGenerator;
-use one_weekend::Camera;
+use one_weekend::{Camera, GeometricPrimitive, Sphere};
 
 fn main() {
     // World

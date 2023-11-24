@@ -1,6 +1,8 @@
 use math::*;
 use noise::RandomNumberGenerator;
 
+use crate::Hittable;
+
 pub struct Camera {
     center: Point3<f64>,
     pixel00_loc: Point3<f64>,

@@ -1,10 +1,10 @@
-use crate::floatops::Float;
-use crate::Interval;
+use math::Float;
+use math::Interval;
+use math::Point3;
+use math::Ray;
 
-use super::HitRecord;
-use super::Hittable;
-use super::Point3;
-use super::Ray;
+use crate::HitRecord;
+use crate::Hittable;
 
 #[derive(Clone, Copy)]
 pub struct Sphere<T> {
@@ -54,6 +54,7 @@ where
 
 pub enum GeometricPrimitive<T> {
     Sphere(Sphere<T>),
+    Other(Box<dyn Hittable<T>>),
 }
 
 impl<T> Hittable<T> for GeometricPrimitive<T>
@@ -63,6 +64,7 @@ where
     fn hit(&self, ray: &Ray<T>, ray_t: Interval<T>) -> Option<HitRecord<T>> {
         match self {
             GeometricPrimitive::Sphere(s) => s.hit(ray, ray_t),
+            GeometricPrimitive::Other(o) => o.hit(ray, ray_t),
         }
     }
 }
