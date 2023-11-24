@@ -73,6 +73,8 @@ fn main() {
         Point3::new(-2.0, 2.0, 1.0),
         Point3::new(0.0, 0.0, -1.0),
         Vector3::new(0.0, 1.0, 0.0),
+        Degrees(10.0),
+        3.4,
     );
 
     // RNG

@@ -39,6 +39,15 @@ impl<T: Float> Vector3<T> {
         }
     }
 
+    pub fn random_in_unit_sphere<RNG: RandomSource<T>>(rng: &mut RNG) -> Self {
+        loop {
+            let p = Vector3::random_range(rng, T::constant(-1.0), T::constant(1.0));
+            if p.length_squared() < T::one() {
+                return p;
+            }
+        }
+    }
+
     pub fn random_unit_vector<RNG: RandomSource<T>>(rng: &mut RNG) -> Self {
         Vector3::random_in_unit_sphere(rng).unit_vector()
     }
@@ -52,9 +61,13 @@ impl<T: Float> Vector3<T> {
         }
     }
 
-    pub fn random_in_unit_sphere<RNG: RandomSource<T>>(rng: &mut RNG) -> Self {
+    pub fn random_in_unit_disc<RNG: RandomSource<T>>(rng: &mut RNG) -> Self {
         loop {
-            let p = Vector3::random(rng);
+            let p = Vector3 {
+                x: rng.next_range(T::constant(-1.0), T::constant(1.0)),
+                y: rng.next_range(T::constant(-1.0), T::constant(1.0)),
+                z: T::constant(0.0),
+            };
             if p.length_squared() < T::one() {
                 return p;
             }
