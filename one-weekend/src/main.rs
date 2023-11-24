@@ -33,12 +33,12 @@ fn main() {
         if choose_mat < 0.8 {
             // lambertian
             material_indices.push(MaterialIndex::Lambertian(materials_lambertian.len()));
-            let albedo = RGB::random(&mut RNGAdapter::new(&mut rng))
-                * RGB::random(&mut RNGAdapter::new(&mut rng));
+            let albedo =
+                RGB::random(&mut RNGAdapter(&mut rng)) * RGB::random(&mut RNGAdapter(&mut rng));
             materials_lambertian.push(Lambertian::new(albedo));
         } else if choose_mat < 0.95 {
             material_indices.push(MaterialIndex::Metal(materials_metal.len()));
-            let albedo = RGB::random_range(&mut RNGAdapter::new(&mut rng), 0.5, 1.0);
+            let albedo = RGB::random_range(&mut RNGAdapter(&mut rng), 0.5, 1.0);
             let fuzz = rng.next_range_f32(0.0, 0.5);
             materials_metal.push(Metal::new(albedo, fuzz));
         } else {

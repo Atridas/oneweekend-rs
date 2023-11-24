@@ -16,4 +16,5 @@ pub trait RandomSource<T> {
     /// Generates a number between [0 and 1)
     fn next(&mut self) -> T;
     fn next_range(&mut self, min: T, max: T) -> T;
+    fn next_bool_with_probability(&mut self, p: T) -> bool;
 }

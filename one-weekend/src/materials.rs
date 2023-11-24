@@ -1,6 +1,4 @@
 use math::{Float, RandomSource, Ray, Vector3, RGB};
-use noise::RandomNumberGenerator;
-use num::traits::AsPrimitive;
 
 use crate::*;
 
@@ -11,7 +9,7 @@ where
 {
     fn scatter(
         &self,
-        rng: &mut RandomNumberGenerator,
+        rng: &mut dyn RandomSource<T>,
         ray: &Ray<T>,
         hit_record: &HitRecord<T, U>,
     ) -> Option<(Ray<T>, RGB<U>)>;
@@ -29,17 +27,15 @@ impl<T, U> Material<T, U> for Lambertian<U>
 where
     T: Float,
     U: Float,
-    for<'a> RNGAdapter<'a>: RandomSource<T>,
 {
     fn scatter(
         &self,
-        rng: &mut RandomNumberGenerator,
+        rng: &mut dyn RandomSource<T>,
         _: &Ray<T>,
         hit_record: &HitRecord<T, U>,
     ) -> Option<(Ray<T>, RGB<U>)> {
-        let mut direction = (hit_record.normal
-            + Vector3::random_unit_vector(&mut RNGAdapter::new(rng)))
-        .unit_vector();
+        let mut direction =
+            (hit_record.normal + Vector3::random_unit_vector(&mut DynAdapter(rng))).unit_vector();
 
         if direction.near_zero() {
             direction = hit_record.normal;
@@ -64,17 +60,16 @@ impl<T, U> Material<T, U> for Metal<U>
 where
     T: Float,
     U: Float + Into<T>,
-    for<'a> RNGAdapter<'a>: RandomSource<T>,
 {
     fn scatter(
         &self,
-        rng: &mut RandomNumberGenerator,
+        rng: &mut dyn RandomSource<T>,
         ray: &Ray<T>,
         hit_record: &HitRecord<T, U>,
     ) -> Option<(Ray<T>, RGB<U>)> {
         let reflected = ray.direction().reflect(hit_record.normal);
         let scattered = (reflected
-            + Vector3::random_unit_vector(&mut RNGAdapter::new(rng)) * self.fuzz.into())
+            + Vector3::random_unit_vector(&mut DynAdapter(rng)) * self.fuzz.into())
         .unit_vector();
         if scattered.dot(hit_record.normal) > T::constant(0.0) {
             Some((Ray::new(hit_record.point, scattered), self.albedo))
@@ -101,12 +96,12 @@ impl<U> Dielectric<U> {
 
 impl<T, U> Material<T, U> for Dielectric<U>
 where
-    T: Float + AsPrimitive<f32>,
+    T: Float,
     U: Float + Into<T>,
 {
     fn scatter(
         &self,
-        rng: &mut RandomNumberGenerator,
+        rng: &mut dyn RandomSource<T>,
         ray: &Ray<T>,
         hit_record: &HitRecord<T, U>,
     ) -> Option<(Ray<T>, RGB<U>)> {
@@ -124,7 +119,7 @@ where
 
         let reflectance = Self::reflectance(cos_theta, refraction_ratio);
 
-        let direction = if cannot_refract || rng.next_bool_with_probability(reflectance.as_()) {
+        let direction = if cannot_refract || rng.next_bool_with_probability(reflectance) {
             ray.direction().reflect(hit_record.normal)
         } else {
             ray.direction().refract(hit_record.normal, refraction_ratio)
