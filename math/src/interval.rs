@@ -1,6 +1,4 @@
-use std::ops::Neg;
-
-use super::floatops::Constants;
+use crate::floatops::Float;
 
 pub struct Interval<T> {
     pub min: T,
@@ -15,32 +13,43 @@ impl<T> Interval<T> {
 
 impl<T> Interval<T>
 where
-    T: Constants + Neg<Output = T>,
+    T: Float,
 {
+    // creation
+
     pub fn empty() -> Interval<T> {
         Interval {
             min: T::infinity(),
             max: -T::infinity(),
         }
     }
+
+    pub fn default() -> Interval<T> {
+        Self::empty()
+    }
+
     pub fn universe() -> Interval<T> {
         Interval {
             min: -T::infinity(),
             max: T::infinity(),
         }
     }
-}
 
-impl<T> Interval<T>
-where
-    T: Copy + PartialOrd,
-{
+    // check functions
+
+    /// checks if a value is inside the range, inclusive
+    /// use "surrounds" for exclusive check
     pub fn contains(&self, x: T) -> bool {
         self.min <= x && x <= self.max
     }
+
+    /// checks if a value is inside the range, exclusive
+    /// use "contains" for inclusive check
     pub fn surrounds(&self, x: T) -> bool {
         self.min < x && x < self.max
     }
+
+    /// clamps a value inside the interval
     pub fn clamp(&self, x: T) -> T {
         if x < self.min {
             self.min
@@ -48,18 +57,6 @@ where
             self.max
         } else {
             x
-        }
-    }
-}
-
-impl<T> Default for Interval<T>
-where
-    T: Constants + Neg<Output = T>,
-{
-    fn default() -> Interval<T> {
-        Interval {
-            min: T::infinity(),
-            max: -T::infinity(),
         }
     }
 }

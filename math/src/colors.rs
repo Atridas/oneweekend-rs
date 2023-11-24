@@ -1,6 +1,6 @@
 use std::ops::{Add, AddAssign, Div, Index, IndexMut, Mul};
 
-use crate::floatops::Constants;
+use crate::floatops::Float;
 
 #[derive(Clone, Copy)]
 pub struct RGB<T> {
@@ -9,35 +9,36 @@ pub struct RGB<T> {
     pub b: T,
 }
 
-impl<T> RGB<T> {
+impl<T> RGB<T>
+where
+    T: Float,
+{
     pub fn new(r: T, g: T, b: T) -> RGB<T> {
         RGB { r, g, b }
+    }
+
+    pub fn black() -> Self {
+        Self::new(T::constant(0.0), T::constant(0.0), T::constant(0.0))
     }
 }
 
 impl<T> RGB<T>
 where
-    T: Constants,
+    T: Float + num::traits::cast::AsPrimitive<u8>,
 {
-    pub fn black() -> Self {
-        Self::new(Constants::zero(), Constants::zero(), Constants::zero())
-    }
-}
-
-impl RGB<f32> {
-    pub fn to_srgb_array(input: &[RGB<f32>]) -> Vec<u8> {
+    pub fn to_srgb_array(input: &[RGB<T>]) -> Vec<u8> {
         let mut result = Vec::with_capacity(input.len());
         for i in input {
-            result.push((i.r.powf(1.0 / 2.2) * 255.0) as u8);
-            result.push((i.g.powf(1.0 / 2.2) * 255.0) as u8);
-            result.push((i.b.powf(1.0 / 2.2) * 255.0) as u8);
+            result.push((i.r.powf(T::constant(1.0 / 2.2)) * T::constant(255.0)).as_());
+            result.push((i.g.powf(T::constant(1.0 / 2.2)) * T::constant(255.0)).as_());
+            result.push((i.b.powf(T::constant(1.0 / 2.2)) * T::constant(255.0)).as_());
         }
         result
     }
 }
 
 // overrides rgb[idx]
-impl<T, Idx: Into<usize>> Index<Idx> for RGB<T> {
+impl<T, Idx: Into<i64>> Index<Idx> for RGB<T> {
     type Output = T;
 
     fn index(&self, index: Idx) -> &Self::Output {
@@ -51,7 +52,7 @@ impl<T, Idx: Into<usize>> Index<Idx> for RGB<T> {
 }
 
 // overrides rgb[idx]
-impl<T, Idx: Into<usize>> IndexMut<Idx> for RGB<T> {
+impl<T, Idx: Into<i64>> IndexMut<Idx> for RGB<T> {
     fn index_mut(&mut self, index: Idx) -> &mut Self::Output {
         match index.into() {
             0 => &mut self.r,
@@ -63,7 +64,7 @@ impl<T, Idx: Into<usize>> IndexMut<Idx> for RGB<T> {
 }
 
 // overrides rgb * s
-impl<T: Mul<Output = T> + Copy> Mul<T> for RGB<T> {
+impl<T: Float> Mul<T> for RGB<T> {
     type Output = RGB<T>;
     fn mul(self, rhs: T) -> RGB<T> {
         RGB::new(self.r * rhs, self.g * rhs, self.b * rhs)
@@ -71,7 +72,7 @@ impl<T: Mul<Output = T> + Copy> Mul<T> for RGB<T> {
 }
 
 // overrides rgb / s
-impl<T: Div<Output = T> + Copy> Div<T> for RGB<T> {
+impl<T: Float> Div<T> for RGB<T> {
     type Output = RGB<T>;
     fn div(self, rhs: T) -> RGB<T> {
         RGB::new(self.r / rhs, self.g / rhs, self.b / rhs)
@@ -79,7 +80,7 @@ impl<T: Div<Output = T> + Copy> Div<T> for RGB<T> {
 }
 
 // overrides rgb1 + rgb2
-impl<T: Add<Output = T> + Copy> Add for RGB<T> {
+impl<T: Float> Add for RGB<T> {
     type Output = RGB<T>;
     fn add(self, rhs: RGB<T>) -> RGB<T> {
         RGB::new(self.r + rhs.r, self.g + rhs.g, self.b + rhs.b)
@@ -87,7 +88,7 @@ impl<T: Add<Output = T> + Copy> Add for RGB<T> {
 }
 
 // overrides rgb1 += rgb2
-impl<T: AddAssign + Copy> AddAssign for RGB<T> {
+impl<T: Float> AddAssign for RGB<T> {
     fn add_assign(&mut self, rhs: Self) {
         self.r += rhs.r;
         self.g += rhs.g;

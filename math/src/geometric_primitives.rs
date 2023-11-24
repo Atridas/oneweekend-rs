@@ -1,15 +1,10 @@
-use core::cmp::PartialOrd;
-use std::ops::{Add, Div, Mul, Neg, Sub};
-
-use crate::floatops::Constants;
-use crate::floatops::HasSqrt;
+use crate::floatops::Float;
 use crate::Interval;
 
 use super::HitRecord;
 use super::Hittable;
 use super::Point3;
 use super::Ray;
-use super::Vector3;
 
 #[derive(Clone, Copy)]
 pub struct Sphere<T> {
@@ -25,16 +20,7 @@ impl<T> Sphere<T> {
 
 impl<T> Hittable<T> for Sphere<T>
 where
-    T: Copy
-        + Add<Output = T>
-        + Div<Output = T>
-        + Mul<Output = T>
-        + Neg<Output = T>
-        + Sub<Output = T>
-        + PartialOrd
-        + HasSqrt
-        + Constants,
-    Point3<T>: Sub<Output = Vector3<T>>,
+    T: Float,
 {
     fn hit(&self, ray: &Ray<T>, ray_t: Interval<T>) -> Option<HitRecord<T>> {
         let oc = ray.origin() - self.center;
@@ -43,7 +29,7 @@ where
         let c = oc.length_squared() - self.radius * self.radius;
         let discriminant = half_b * half_b - a * c;
 
-        if discriminant < <T as Constants>::zero() {
+        if discriminant < T::constant(0.0) {
             return None;
         }
         let sqrtd = discriminant.sqrt();

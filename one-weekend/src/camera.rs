@@ -100,8 +100,9 @@ impl Camera {
         }
         match world.hit(ray, Interval::new(0.001, f64::INFINITY)) {
             Some(record) => {
-                let direction = (record.normal + Vector3::random_on_hemisphere(rng, record.normal))
-                    .unit_vector();
+                let direction = (record.normal
+                    + Vector3::random_on_hemisphere(&mut RNGAdapter(rng), record.normal))
+                .unit_vector();
 
                 Self::ray_color(&Ray::new(record.point, direction), depth - 1, world, rng) * 0.5
             }
@@ -131,5 +132,26 @@ impl Camera {
         let ray_direction = pixel_sample - ray_origin;
 
         Ray::new(ray_origin, ray_direction)
+    }
+}
+
+struct RNGAdapter<'a>(&'a mut RandomNumberGenerator);
+
+impl<'a> RandomSource<f32> for RNGAdapter<'a> {
+    /// Generates a number between [0 and 1)
+    fn next(&mut self) -> f32 {
+        self.0.next_float()
+    }
+    fn next_range(&mut self, min: f32, max: f32) -> f32 {
+        min + self.0.next_float() * (max - min)
+    }
+}
+impl<'a> RandomSource<f64> for RNGAdapter<'a> {
+    /// Generates a number between [0 and 1)
+    fn next(&mut self) -> f64 {
+        self.0.next_double()
+    }
+    fn next_range(&mut self, min: f64, max: f64) -> f64 {
+        min + self.0.next_double() * (max - min)
     }
 }

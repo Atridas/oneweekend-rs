@@ -1,6 +1,5 @@
-use crate::{floatops::Constants, RandomSource};
+use crate::{floatops::Float, RandomSource};
 
-use super::floatops::HasSqrt;
 use std::ops::{Add, AddAssign, Div, DivAssign, Index, IndexMut, Mul, MulAssign, Neg, Sub};
 
 #[derive(Clone, Copy)]
@@ -17,7 +16,9 @@ pub struct Point3<T> {
     pub z: T,
 }
 
-impl<T> Vector3<T> {
+impl<T: Float> Vector3<T> {
+    // creation utilities
+
     pub fn new(x: T, y: T, z: T) -> Self {
         Self { x, y, z }
     }
@@ -29,56 +30,12 @@ impl<T> Vector3<T> {
             z: rng.next(),
         }
     }
-}
-impl<T> Vector3<T>
-where
-    T: Copy,
-{
+
     pub fn random_range<RNG: RandomSource<T>>(rng: &mut RNG, min: T, max: T) -> Self {
         Self {
             x: rng.next_range(min, max),
             y: rng.next_range(min, max),
             z: rng.next_range(min, max),
-        }
-    }
-}
-
-impl<T> Point3<T> {
-    pub fn new(x: T, y: T, z: T) -> Self {
-        Self { x, y, z }
-    }
-}
-
-impl<T> Vector3<T>
-where
-    T: Copy,
-    T: Add<Output = T>,
-    T: Mul<Output = T>,
-{
-    pub fn dot(&self, rhs: Vector3<T>) -> T {
-        self.x * rhs.x + self.y * rhs.y + self.z * rhs.z
-    }
-    pub fn length_squared(&self) -> T {
-        self.dot(*self)
-    }
-}
-impl<T> Vector3<T>
-where
-    T: Copy,
-    T: Add<Output = T>,
-    T: Div<Output = T>,
-    T: Mul<Output = T>,
-    T: Neg<Output = T>,
-    T: PartialOrd,
-    T: Constants,
-    T: HasSqrt,
-{
-    pub fn random_in_unit_sphere<RNG: RandomSource<T>>(rng: &mut RNG) -> Self {
-        loop {
-            let p = Vector3::random(rng);
-            if p.length_squared() < T::one() {
-                return p;
-            }
         }
     }
 
@@ -88,20 +45,40 @@ where
 
     pub fn random_on_hemisphere<RNG: RandomSource<T>>(rng: &mut RNG, normal: Self) -> Self {
         let on_unit_sphere = Vector3::random_unit_vector(rng);
-        if on_unit_sphere.dot(normal) > Constants::zero() {
+        if on_unit_sphere.dot(normal) > T::constant(0.0) {
             on_unit_sphere
         } else {
             -on_unit_sphere
         }
     }
-}
 
-impl<T> Vector3<T>
-where
-    T: Copy,
-    T: Sub<Output = T>,
-    T: Mul<Output = T>,
-{
+    pub fn random_in_unit_sphere<RNG: RandomSource<T>>(rng: &mut RNG) -> Self {
+        loop {
+            let p = Vector3::random(rng);
+            if p.length_squared() < T::one() {
+                return p;
+            }
+        }
+    }
+
+    // geometric operations
+
+    pub fn dot(&self, rhs: Vector3<T>) -> T {
+        self.x * rhs.x + self.y * rhs.y + self.z * rhs.z
+    }
+
+    pub fn length(&self) -> T {
+        self.dot(*self).sqrt()
+    }
+
+    pub fn length_squared(&self) -> T {
+        self.dot(*self)
+    }
+
+    pub fn unit_vector(self) -> Vector3<T> {
+        self / self.length()
+    }
+
     pub fn cross(&self, rhs: Vector3<T>) -> Vector3<T> {
         Vector3::new(
             self.y * rhs.z - self.z * rhs.y,
@@ -109,45 +86,20 @@ where
             self.x * rhs.y - self.y * rhs.x,
         )
     }
-}
 
-impl<T> Vector3<T>
-where
-    T: Copy,
-    T: Mul<Output = T>,
-{
     pub fn hproduct(&self, rhs: Vector3<T>) -> Vector3<T> {
         Vector3::new(self.x * rhs.x, self.y * rhs.y, self.z * rhs.z)
     }
 }
 
-impl<T> Vector3<T>
-where
-    T: Copy,
-    T: Add<Output = T>,
-    T: Mul<Output = T>,
-    T: HasSqrt,
-{
-    pub fn length(&self) -> T {
-        self.dot(*self).sqrt()
-    }
-}
-
-impl<T> Vector3<T>
-where
-    T: Copy,
-    T: Add<Output = T>,
-    T: Mul<Output = T>,
-    T: Div<Output = T>,
-    T: HasSqrt,
-{
-    pub fn unit_vector(self) -> Vector3<T> {
-        self / self.length()
+impl<T> Point3<T> {
+    pub fn new(x: T, y: T, z: T) -> Self {
+        Self { x, y, z }
     }
 }
 
 // overrides vec[idx]
-impl<T, Idx: Into<usize>> Index<Idx> for Vector3<T> {
+impl<T, Idx: Into<i64>> Index<Idx> for Vector3<T> {
     type Output = T;
 
     fn index(&self, index: Idx) -> &Self::Output {
@@ -161,7 +113,7 @@ impl<T, Idx: Into<usize>> Index<Idx> for Vector3<T> {
 }
 
 // overrides vec[idx]
-impl<T, Idx: Into<usize>> IndexMut<Idx> for Vector3<T> {
+impl<T, Idx: Into<i64>> IndexMut<Idx> for Vector3<T> {
     fn index_mut(&mut self, index: Idx) -> &mut Self::Output {
         match index.into() {
             0 => &mut self.x,
@@ -173,7 +125,7 @@ impl<T, Idx: Into<usize>> IndexMut<Idx> for Vector3<T> {
 }
 
 // overrides point[idx]
-impl<T, Idx: Into<usize>> Index<Idx> for Point3<T> {
+impl<T, Idx: Into<i64>> Index<Idx> for Point3<T> {
     type Output = T;
 
     fn index(&self, index: Idx) -> &Self::Output {
@@ -187,7 +139,7 @@ impl<T, Idx: Into<usize>> Index<Idx> for Point3<T> {
 }
 
 // overrides point[idx]
-impl<T, Idx: Into<usize>> IndexMut<Idx> for Point3<T> {
+impl<T, Idx: Into<i64>> IndexMut<Idx> for Point3<T> {
     fn index_mut(&mut self, index: Idx) -> &mut Self::Output {
         match index.into() {
             0 => &mut self.x,
@@ -199,7 +151,7 @@ impl<T, Idx: Into<usize>> IndexMut<Idx> for Point3<T> {
 }
 
 // overrides -vec
-impl<T: Neg<Output = T>> Neg for Vector3<T> {
+impl<T: Float> Neg for Vector3<T> {
     type Output = Vector3<T>;
 
     fn neg(self) -> Vector3<T> {
@@ -208,7 +160,7 @@ impl<T: Neg<Output = T>> Neg for Vector3<T> {
 }
 
 // overrides vec1 + vec2
-impl<T: Add<Output = T> + Copy> Add for Vector3<T> {
+impl<T: Float> Add for Vector3<T> {
     type Output = Vector3<T>;
     fn add(self, rhs: Self) -> Vector3<T> {
         Vector3::new(self.x + rhs.x, self.y + rhs.y, self.z + rhs.z)
@@ -216,7 +168,7 @@ impl<T: Add<Output = T> + Copy> Add for Vector3<T> {
 }
 
 // overrides point + vec
-impl<T: Add<Output = T> + Copy> Add<Vector3<T>> for Point3<T> {
+impl<T: Float> Add<Vector3<T>> for Point3<T> {
     type Output = Point3<T>;
     fn add(self, rhs: Vector3<T>) -> Point3<T> {
         Point3::new(self.x + rhs.x, self.y + rhs.y, self.z + rhs.z)
@@ -224,7 +176,7 @@ impl<T: Add<Output = T> + Copy> Add<Vector3<T>> for Point3<T> {
 }
 
 // overrides vec1 - vec2
-impl<T: Sub<Output = T> + Copy> Sub for Vector3<T> {
+impl<T: Float> Sub for Vector3<T> {
     type Output = Vector3<T>;
     fn sub(self, rhs: Self) -> Vector3<T> {
         Vector3::new(self.x - rhs.x, self.y - rhs.y, self.z - rhs.z)
@@ -232,7 +184,7 @@ impl<T: Sub<Output = T> + Copy> Sub for Vector3<T> {
 }
 
 // overrides point1 - point2
-impl<T: Sub<Output = T> + Copy> Sub for Point3<T> {
+impl<T: Float> Sub for Point3<T> {
     type Output = Vector3<T>;
     fn sub(self, rhs: Self) -> Vector3<T> {
         Vector3::new(self.x - rhs.x, self.y - rhs.y, self.z - rhs.z)
@@ -240,7 +192,7 @@ impl<T: Sub<Output = T> + Copy> Sub for Point3<T> {
 }
 
 // overrides point - vec
-impl<T: Sub<Output = T> + Copy> Sub<Vector3<T>> for Point3<T> {
+impl<T: Float> Sub<Vector3<T>> for Point3<T> {
     type Output = Point3<T>;
     fn sub(self, rhs: Vector3<T>) -> Point3<T> {
         Point3::new(self.x - rhs.x, self.y - rhs.y, self.z - rhs.z)
@@ -248,7 +200,7 @@ impl<T: Sub<Output = T> + Copy> Sub<Vector3<T>> for Point3<T> {
 }
 
 // overrides vec * s
-impl<T: Mul<Output = T> + Copy> Mul<T> for Vector3<T> {
+impl<T: Float> Mul<T> for Vector3<T> {
     type Output = Vector3<T>;
     fn mul(self, rhs: T) -> Vector3<T> {
         Vector3::new(self.x * rhs, self.y * rhs, self.z * rhs)
@@ -256,7 +208,7 @@ impl<T: Mul<Output = T> + Copy> Mul<T> for Vector3<T> {
 }
 
 // overrides vec / s
-impl<T: Div<Output = T> + Copy> Div<T> for Vector3<T> {
+impl<T: Float> Div<T> for Vector3<T> {
     type Output = Vector3<T>;
     fn div(self, rhs: T) -> Vector3<T> {
         Vector3::new(self.x / rhs, self.y / rhs, self.z / rhs)
@@ -264,7 +216,7 @@ impl<T: Div<Output = T> + Copy> Div<T> for Vector3<T> {
 }
 
 // overrides vec1 += vec2
-impl<T: AddAssign> AddAssign for Vector3<T> {
+impl<T: Float> AddAssign for Vector3<T> {
     fn add_assign(&mut self, rhs: Self) {
         self.x += rhs.x;
         self.y += rhs.y;
@@ -273,7 +225,7 @@ impl<T: AddAssign> AddAssign for Vector3<T> {
 }
 
 // overrides vec += point
-impl<T: AddAssign> AddAssign<Vector3<T>> for Point3<T> {
+impl<T: Float> AddAssign<Vector3<T>> for Point3<T> {
     fn add_assign(&mut self, rhs: Vector3<T>) {
         self.x += rhs.x;
         self.y += rhs.y;
@@ -282,7 +234,7 @@ impl<T: AddAssign> AddAssign<Vector3<T>> for Point3<T> {
 }
 
 // overrides vec *= s
-impl<T: MulAssign + Copy> MulAssign<T> for Vector3<T> {
+impl<T: Float> MulAssign<T> for Vector3<T> {
     fn mul_assign(&mut self, rhs: T) {
         self.x *= rhs;
         self.y *= rhs;
@@ -291,7 +243,7 @@ impl<T: MulAssign + Copy> MulAssign<T> for Vector3<T> {
 }
 
 // overrides vec /= s
-impl<T: DivAssign + Copy> DivAssign<T> for Vector3<T> {
+impl<T: Float> DivAssign<T> for Vector3<T> {
     fn div_assign(&mut self, rhs: T) {
         self.x /= rhs;
         self.y /= rhs;

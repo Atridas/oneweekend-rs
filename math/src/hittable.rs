@@ -1,7 +1,4 @@
-use core::cmp::PartialOrd;
-use std::ops::{Add, Mul, Neg};
-
-use crate::floatops::Constants;
+use crate::floatops::Float;
 use crate::Interval;
 
 use super::Point3;
@@ -21,10 +18,10 @@ pub trait Hittable<T> {
 
 impl<T> HitRecord<T>
 where
-    T: Copy + Add<Output = T> + Mul<Output = T> + Neg<Output = T> + PartialOrd + Constants,
+    T: Float,
 {
     pub fn new(ray: &Ray<T>, point: Point3<T>, outward_normal: Vector3<T>, t: T) -> HitRecord<T> {
-        let zero = <T as Constants>::zero();
+        let zero = T::constant(0.0);
         let front_face = ray.direction().dot(outward_normal) < zero;
         let normal = match front_face {
             true => outward_normal,
