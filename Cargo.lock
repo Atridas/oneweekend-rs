@@ -42,6 +42,7 @@ name = "noise"
 version = "0.1.0"
 dependencies = [
  "external",
+ "num",
 ]
 
 [[package]]
@@ -127,4 +128,5 @@ dependencies = [
  "external",
  "math",
  "noise",
+ "num",
 ]

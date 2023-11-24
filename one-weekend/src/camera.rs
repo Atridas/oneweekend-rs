@@ -101,6 +101,7 @@ impl Camera {
         world: &T,
         rng: &mut RandomNumberGenerator,
     ) -> RGB<f32> {
+        assert!(ray.direction().is_unit_vector());
         if depth <= 0 {
             return RGB::black();
         }
@@ -136,7 +137,7 @@ impl Camera {
         let ray_origin = self.center;
         let ray_direction = pixel_sample - ray_origin;
 
-        Ray::new(ray_origin, ray_direction)
+        Ray::new(ray_origin, ray_direction.unit_vector())
     }
 }
 

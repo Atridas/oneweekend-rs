@@ -1,4 +1,5 @@
 use external::squirrel_noise::*;
+use num::Float;
 
 pub struct RandomNumberGenerator {
     pos: i32,
@@ -8,6 +9,10 @@ pub struct RandomNumberGenerator {
 impl RandomNumberGenerator {
     pub fn new(seed: u32) -> RandomNumberGenerator {
         RandomNumberGenerator { pos: 0, seed }
+    }
+
+    pub fn next_bool_with_probability(&mut self, probability: f32) -> bool {
+        self.next_float() < probability
     }
 
     pub fn next_int(&mut self) -> i32 {

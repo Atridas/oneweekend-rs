@@ -9,3 +9,4 @@ edition = "2021"
 external = { path = "../external" }
 math = {path = "../math" }
 noise = { path = "../noise" }
+num = "0.4"

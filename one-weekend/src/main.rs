@@ -1,15 +1,16 @@
 use external::stb;
 use math::*;
 use noise::RandomNumberGenerator;
-use one_weekend::{Camera, GeometricPrimitive, Lambertian, Metal, Sphere};
+use one_weekend::{Camera, Dielectric, GeometricPrimitive, Lambertian, Metal, Sphere};
 
 fn main() {
     // Materials
 
     let material_ground = Lambertian::new(RGB::new(0.8, 0.8, 0.0));
-    let material_center = Lambertian::new(RGB::new(0.7, 0.3, 0.3));
-    let material_left = Metal::new(RGB::new(0.8, 0.8, 0.8), 0.3);
-    let material_right = Metal::new(RGB::new(0.8, 0.6, 0.2), 1.0);
+    let material_center = Lambertian::new(RGB::new(0.1, 0.2, 0.5));
+    //let material_left = Metal::new(RGB::new(0.8, 0.8, 0.8), 0.3);
+    let material_left = Dielectric::new(1.5);
+    let material_right = Metal::new(RGB::new(0.8, 0.6, 0.2), 0.0);
 
     // World
 
@@ -39,6 +40,15 @@ fn main() {
             z: -1.0,
         },
         0.5,
+        &material_left,
+    )));
+    world.push(GeometricPrimitive::Sphere(Sphere::new(
+        Point3 {
+            x: -1.0,
+            y: 0.0,
+            z: -1.0,
+        },
+        -0.4,
         &material_left,
     )));
     world.push(GeometricPrimitive::Sphere(Sphere::new(

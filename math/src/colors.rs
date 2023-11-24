@@ -17,6 +17,10 @@ where
         RGB { r, g, b }
     }
 
+    pub fn white() -> Self {
+        Self::new(T::constant(1.0), T::constant(1.0), T::constant(1.0))
+    }
+
     pub fn black() -> Self {
         Self::new(T::constant(0.0), T::constant(0.0), T::constant(0.0))
     }

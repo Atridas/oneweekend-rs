@@ -95,9 +95,22 @@ impl<T: Float> Vector3<T> {
         *self - normal * (self.dot(normal) * T::constant(2.0))
     }
 
+    pub fn refract(&self, n: Vector3<T>, etai_over_etat: T) -> Vector3<T> {
+        let cos_theta = -self.dot(n).min(T::constant(1.0));
+        let r_out_perp = (*self + n * cos_theta) * etai_over_etat;
+        let r_out_parallel = n * -(T::constant(1.0) - r_out_perp.length_squared())
+            .abs()
+            .sqrt();
+        r_out_perp + r_out_parallel
+    }
+
     pub fn near_zero(&self) -> bool {
         let s = T::constant(1e-8);
         self.x.abs() < s && self.y.abs() < s && self.z.abs() < s
+    }
+    pub fn is_unit_vector(&self) -> bool {
+        let s = T::constant(1e-8);
+        (self.length_squared() - T::constant(1.0)).abs() < s
     }
 }
 
