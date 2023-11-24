@@ -2,7 +2,7 @@ use math::{Float, RandomSource, Ray, Vector3, RGB};
 use noise::RandomNumberGenerator;
 use num::traits::AsPrimitive;
 
-use crate::{HitRecord, RNGAdapter};
+use crate::*;
 
 pub trait Material<T, U>
 where

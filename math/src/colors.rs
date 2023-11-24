@@ -1,6 +1,6 @@
 use std::ops::{Add, AddAssign, Div, Index, IndexMut, Mul};
 
-use crate::floatops::Float;
+use crate::{floatops::Float, RandomSource};
 
 #[derive(Clone, Copy)]
 pub struct RGB<T> {
@@ -15,6 +15,22 @@ where
 {
     pub fn new(r: T, g: T, b: T) -> RGB<T> {
         RGB { r, g, b }
+    }
+
+    pub fn random<RNG: RandomSource<T>>(rng: &mut RNG) -> Self {
+        Self {
+            r: rng.next(),
+            g: rng.next(),
+            b: rng.next(),
+        }
+    }
+
+    pub fn random_range<RNG: RandomSource<T>>(rng: &mut RNG, min: T, max: T) -> Self {
+        Self {
+            r: rng.next_range(min, max),
+            g: rng.next_range(min, max),
+            b: rng.next_range(min, max),
+        }
     }
 
     pub fn white() -> Self {

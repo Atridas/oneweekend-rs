@@ -1,7 +1,7 @@
 use math::*;
 use noise::RandomNumberGenerator;
 
-use crate::Hittable;
+use crate::{Hittable, RNGAdapter};
 
 pub struct Camera {
     center: Point3<f64>,
@@ -161,32 +161,5 @@ impl Camera {
         // returns a random point in the camera defocus disk
         let p = Vector3::random_in_unit_disc(&mut RNGAdapter::new(rng));
         self.center + self.defocus_disc_u * p.x + self.defocus_disc_v * p.y
-    }
-}
-
-pub struct RNGAdapter<'a>(&'a mut RandomNumberGenerator);
-
-impl<'a> RNGAdapter<'a> {
-    pub fn new(rng: &'a mut RandomNumberGenerator) -> RNGAdapter<'a> {
-        RNGAdapter(rng)
-    }
-}
-
-impl RandomSource<f32> for RNGAdapter<'_> {
-    /// Generates a number between [0 and 1)
-    fn next(&mut self) -> f32 {
-        self.0.next_f32()
-    }
-    fn next_range(&mut self, min: f32, max: f32) -> f32 {
-        min + self.0.next_f32() * (max - min)
-    }
-}
-impl RandomSource<f64> for RNGAdapter<'_> {
-    /// Generates a number between [0 and 1)
-    fn next(&mut self) -> f64 {
-        self.0.next_f64()
-    }
-    fn next_range(&mut self, min: f64, max: f64) -> f64 {
-        min + self.0.next_f64() * (max - min)
     }
 }

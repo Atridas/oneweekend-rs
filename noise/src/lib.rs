@@ -31,4 +31,12 @@ impl RandomNumberGenerator {
         self.pos += 1;
         get1d_noise_zero_to_one_f64(x, self.seed)
     }
+
+    pub fn next_range_f32(&mut self, min: f32, max: f32) -> f32 {
+        min + self.next_f32() * (max - min)
+    }
+
+    pub fn next_range_f64(&mut self, min: f64, max: f64) -> f64 {
+        min + self.next_f64() * (max - min)
+    }
 }
