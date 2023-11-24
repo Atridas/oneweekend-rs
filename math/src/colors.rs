@@ -63,6 +63,14 @@ impl<T, Idx: Into<i64>> IndexMut<Idx> for RGB<T> {
     }
 }
 
+// overrides rgb1 * rgb2
+impl<T: Float> Mul for RGB<T> {
+    type Output = Self;
+    fn mul(self, rhs: Self) -> Self {
+        Self::new(self.r * rhs.r, self.g * rhs.g, self.b * rhs.b)
+    }
+}
+
 // overrides rgb * s
 impl<T: Float> Mul<T> for RGB<T> {
     type Output = RGB<T>;

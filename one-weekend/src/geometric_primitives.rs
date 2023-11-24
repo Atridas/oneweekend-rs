@@ -5,24 +5,31 @@ use math::Ray;
 
 use crate::HitRecord;
 use crate::Hittable;
+use crate::Material;
 
 #[derive(Clone, Copy)]
-pub struct Sphere<T> {
+pub struct Sphere<'a, T, U> {
     center: Point3<T>,
     radius: T,
+    material: &'a dyn Material<T, U>,
 }
 
-impl<T> Sphere<T> {
-    pub fn new(center: Point3<T>, radius: T) -> Sphere<T> {
-        Sphere { center, radius }
+impl<'a, T, U> Sphere<'a, T, U> {
+    pub fn new(center: Point3<T>, radius: T, material: &'a dyn Material<T, U>) -> Sphere<'a, T, U> {
+        Sphere {
+            center,
+            radius,
+            material,
+        }
     }
 }
 
-impl<T> Hittable<T> for Sphere<T>
+impl<'a, T, U> Hittable<T, U> for Sphere<'a, T, U>
 where
     T: Float,
+    U: Float,
 {
-    fn hit(&self, ray: &Ray<T>, ray_t: Interval<T>) -> Option<HitRecord<T>> {
+    fn hit(&self, ray: &Ray<T>, ray_t: Interval<T>) -> Option<HitRecord<'a, T, U>> {
         let oc = ray.origin() - self.center;
         let a = ray.direction().length_squared();
         let half_b = oc.dot(ray.direction());
@@ -47,21 +54,22 @@ where
             &ray,
             point,
             (point - self.center) / self.radius,
+            self.material,
             root,
         ))
     }
 }
 
-pub enum GeometricPrimitive<T> {
-    Sphere(Sphere<T>),
-    Other(Box<dyn Hittable<T>>),
+pub enum GeometricPrimitive<'a, T, U> {
+    Sphere(Sphere<'a, T, U>),
+    Other(Box<dyn Hittable<T, U>>),
 }
 
-impl<T> Hittable<T> for GeometricPrimitive<T>
+impl<'a, T, U> Hittable<T, U> for GeometricPrimitive<'a, T, U>
 where
-    Sphere<T>: Hittable<T>,
+    Sphere<'a, T, U>: Hittable<T, U>,
 {
-    fn hit(&self, ray: &Ray<T>, ray_t: Interval<T>) -> Option<HitRecord<T>> {
+    fn hit(&self, ray: &Ray<T>, ray_t: Interval<T>) -> Option<HitRecord<T, U>> {
         match self {
             GeometricPrimitive::Sphere(s) => s.hit(ray, ray_t),
             GeometricPrimitive::Other(o) => o.hit(ray, ray_t),
@@ -69,12 +77,12 @@ where
     }
 }
 
-impl<T> Hittable<T> for &[GeometricPrimitive<T>]
+impl<'a, T, U> Hittable<T, U> for &[GeometricPrimitive<'a, T, U>]
 where
     T: Copy,
-    Sphere<T>: Hittable<T>,
+    Sphere<'a, T, U>: Hittable<T, U>,
 {
-    fn hit(&self, ray: &Ray<T>, ray_t: Interval<T>) -> Option<HitRecord<T>> {
+    fn hit(&self, ray: &Ray<T>, ray_t: Interval<T>) -> Option<HitRecord<T, U>> {
         let mut result = None;
         let mut closest = ray_t.max;
         for object in self.iter() {

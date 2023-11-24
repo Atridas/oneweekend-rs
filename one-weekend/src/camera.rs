@@ -69,7 +69,7 @@ impl Camera {
         self.image_height
     }
 
-    pub fn render<T: Hittable<f64>>(
+    pub fn render<T: Hittable<f64, f32>>(
         &self,
         world: &T,
         rng: &mut RandomNumberGenerator,
@@ -91,7 +91,7 @@ impl Camera {
         data
     }
 
-    fn ray_color<T: Hittable<f64>>(
+    fn ray_color<T: Hittable<f64, f32>>(
         ray: &Ray<f64>,
         depth: u32,
         world: &T,
@@ -101,12 +101,18 @@ impl Camera {
             return RGB::black();
         }
         match world.hit(ray, Interval::new(0.001, f64::INFINITY)) {
-            Some(record) => {
-                let direction = (record.normal
-                    + Vector3::random_on_hemisphere(&mut RNGAdapter(rng), record.normal))
-                .unit_vector();
+            Some(hit_record) => {
+                // let direction = (record.normal
+                //     + Vector3::random_on_hemisphere(&mut RNGAdapter(rng), record.normal))
+                // .unit_vector();
 
-                Self::ray_color(&Ray::new(record.point, direction), depth - 1, world, rng) * 0.5
+                // Self::ray_color(&Ray::new(record.point, direction), depth - 1, world, rng) * 0.5
+                match hit_record.material.scatter(rng, ray, &hit_record) {
+                    Some((scattered_ray, attenuation)) => {
+                        attenuation * Self::ray_color(&scattered_ray, depth - 1, world, rng)
+                    }
+                    None => RGB::black(),
+                }
             }
             None => {
                 let unit_direction = Vector3::unit_vector(ray.direction());
@@ -137,9 +143,15 @@ impl Camera {
     }
 }
 
-struct RNGAdapter<'a>(&'a mut RandomNumberGenerator);
+pub struct RNGAdapter<'a>(&'a mut RandomNumberGenerator);
 
-impl<'a> RandomSource<f32> for RNGAdapter<'a> {
+impl<'a> RNGAdapter<'a> {
+    pub fn new(rng: &'a mut RandomNumberGenerator) -> RNGAdapter<'a> {
+        RNGAdapter(rng)
+    }
+}
+
+impl RandomSource<f32> for RNGAdapter<'_> {
     /// Generates a number between [0 and 1)
     fn next(&mut self) -> f32 {
         self.0.next_float()
@@ -148,7 +160,7 @@ impl<'a> RandomSource<f32> for RNGAdapter<'a> {
         min + self.0.next_float() * (max - min)
     }
 }
-impl<'a> RandomSource<f64> for RNGAdapter<'a> {
+impl RandomSource<f64> for RNGAdapter<'_> {
     /// Generates a number between [0 and 1)
     fn next(&mut self) -> f64 {
         self.0.next_double()

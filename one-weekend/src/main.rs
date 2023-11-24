@@ -1,11 +1,16 @@
 use external::stb;
 use math::*;
 use noise::RandomNumberGenerator;
-use one_weekend::{Camera, GeometricPrimitive, Sphere};
+use one_weekend::{Camera, GeometricPrimitive, Lambertian, Sphere};
 
 fn main() {
+    // Materials
+
+    let lambertian1 = Lambertian::new(RGB::new(0.5, 0.5, 0.5));
+
     // World
-    let mut world: Vec<GeometricPrimitive<f64>> = Vec::new();
+
+    let mut world: Vec<GeometricPrimitive<f64, f32>> = Vec::new();
     world.push(GeometricPrimitive::Sphere(Sphere::new(
         Point3 {
             x: 0.0,
@@ -13,6 +18,7 @@ fn main() {
             z: -1.0,
         },
         0.5,
+        &lambertian1,
     )));
     world.push(GeometricPrimitive::Sphere(Sphere::new(
         Point3 {
@@ -21,6 +27,7 @@ fn main() {
             z: -1.0,
         },
         100.0,
+        &lambertian1,
     )));
 
     let world = &world[..];
