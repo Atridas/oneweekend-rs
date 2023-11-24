@@ -1,9 +1,11 @@
+mod angles;
 mod colors;
 mod floatops;
 mod interval;
 mod rays;
 mod vectors;
 
+pub use angles::*;
 pub use colors::*;
 pub use floatops::Float;
 pub use interval::*;

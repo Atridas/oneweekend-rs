@@ -20,43 +20,49 @@ impl Camera {
         image_width: u32,
         samples_per_pixel: u32,
         max_depth: u32,
+        vfov: Degrees<f64>,
+        lookfrom: Point3<f64>,
+        lookat: Point3<f64>,
+        up: Vector3<f64>,
     ) -> Camera {
-        // Calculate the image height, and ensure that it's at least 1.
-        let image_height = (image_width as f64 / aspect_ratio) as usize;
-        let image_height = if image_height < 1usize {
-            1usize
-        } else {
-            image_height
-        };
+        // Calculate the image height, and ensure that it's at least 1
+        let mut image_height = (image_width as f64 / aspect_ratio) as u32;
+        if image_height < 1 {
+            image_height = 1;
+        }
+        let image_height = image_height;
 
-        // Camera
+        // Determine viewport dimensions
         let focal_length = 1.0;
-        let viewport_height = 2.0;
+        let theta = vfov.0.to_radians();
+        let h = (theta * 0.5).tan();
+        let viewport_height = 2.0 * h * focal_length;
         let viewport_width = viewport_height * (image_width as f64 / image_height as f64);
-        let camera_center = Point3::new(0.0, 0.0, 0.0);
 
-        // Calculate the vectors across the horizontal and down the vertical viewport edges.
-        let viewport_u = Vector3::new(viewport_width, 0.0, 0.0);
-        let viewport_v = Vector3::new(0.0, -viewport_height, 0.0);
+        // Calculate the u,v,w unit basis vectors for the camera coordinate frame
+        let w = (lookfrom - lookat).unit_vector();
+        let u = up.cross(w).unit_vector();
+        let v = w.cross(u);
+
+        // Calculate the vectors across the horizontal and down the vertical viewport edges
+        let viewport_u = u * viewport_width;
+        let viewport_v = v * -viewport_height;
 
         // Calculate the horizontal and vertical delta vectors from pixel to pixel.
         let pixel_delta_u = viewport_u / image_width as f64;
         let pixel_delta_v = viewport_v / image_height as f64;
 
         // Calculate the location of the upper left pixel.
-        let viewport_upper_left = camera_center
-            - Vector3::new(0.0, 0.0, focal_length)
-            - viewport_u * 0.5
-            - viewport_v * 0.5;
+        let viewport_upper_left = lookfrom - w * focal_length - viewport_u * 0.5 - viewport_v * 0.5;
         let pixel00_loc = viewport_upper_left + (pixel_delta_u + pixel_delta_v) * 0.5;
 
         Camera {
-            center: Point3::new(0.0, 0.0, 0.0),
+            center: lookfrom,
             pixel00_loc,
             pixel_delta_u,
             pixel_delta_v,
             image_width,
-            image_height: image_height as u32,
+            image_height,
             samples_per_pixel,
             max_depth,
         }
@@ -122,8 +128,8 @@ impl Camera {
 
     fn pixel_sample_square(&self, rng: &mut RandomNumberGenerator) -> Vector3<f64> {
         // Returns a random point in the square surrounding a pixel at the origin.
-        let px = -0.5 + rng.next_double();
-        let py = -0.5 + rng.next_double();
+        let px = -0.5 + rng.next_f64();
+        let py = -0.5 + rng.next_f64();
         return (self.pixel_delta_u * px) + (self.pixel_delta_v * py);
     }
 
@@ -135,9 +141,9 @@ impl Camera {
         let pixel_sample = pixel_center + self.pixel_sample_square(rng);
 
         let ray_origin = self.center;
-        let ray_direction = pixel_sample - ray_origin;
+        let ray_direction = (pixel_sample - self.center).unit_vector();
 
-        Ray::new(ray_origin, ray_direction.unit_vector())
+        Ray::new(ray_origin, ray_direction)
     }
 }
 
@@ -152,18 +158,18 @@ impl<'a> RNGAdapter<'a> {
 impl RandomSource<f32> for RNGAdapter<'_> {
     /// Generates a number between [0 and 1)
     fn next(&mut self) -> f32 {
-        self.0.next_float()
+        self.0.next_f32()
     }
     fn next_range(&mut self, min: f32, max: f32) -> f32 {
-        min + self.0.next_float() * (max - min)
+        min + self.0.next_f32() * (max - min)
     }
 }
 impl RandomSource<f64> for RNGAdapter<'_> {
     /// Generates a number between [0 and 1)
     fn next(&mut self) -> f64 {
-        self.0.next_double()
+        self.0.next_f64()
     }
     fn next_range(&mut self, min: f64, max: f64) -> f64 {
-        min + self.0.next_double() * (max - min)
+        min + self.0.next_f64() * (max - min)
     }
 }

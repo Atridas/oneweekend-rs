@@ -55,7 +55,7 @@ pub fn squirrel_noise5(x: i32, seed: u32) -> i32 {
 }
 
 //-----------------------------------------------------------------------------------------------
-pub fn get1d_noise_zero_to_one(index: i32, seed: u32) -> f32 {
+pub fn get1d_noise_zero_to_one_f32(index: i32, seed: u32) -> f32 {
     get1d_noise_zero_to_one_f64(index, seed) as f32
 }
 

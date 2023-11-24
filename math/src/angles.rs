@@ -1,22 +1,22 @@
 use super::floatops::Float;
 
-struct Degree<T>(T);
-struct Radian<T>(T);
+pub struct Degrees<T>(pub T);
+pub struct Radians<T>(pub T);
 
-impl<T> From<Degree<T>> for Radian<T>
+impl<T> From<Degrees<T>> for Radians<T>
 where
     T: Float,
 {
-    fn from(d: Degree<T>) -> Radian<T> {
-        T::to_radians()
+    fn from(d: Degrees<T>) -> Radians<T> {
+        Radians(d.0.to_radians())
     }
 }
 
-impl<T> From<Radian<T>> for Degree<T>
+impl<T> From<Radians<T>> for Degrees<T>
 where
     T: Float,
 {
-    fn from(r: Radian<T>) -> Degree<T> {
-        T::to_degrees()
+    fn from(r: Radians<T>) -> Degrees<T> {
+        Degrees(r.0.to_degrees())
     }
 }
